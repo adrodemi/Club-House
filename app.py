@@ -72,7 +72,6 @@ def init_db1():
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                    title TEXT NOT NULL,
                    description TEXT,
-                   age INTEGER,
                    latitude REAL NOT NULL,
                    longitude REAL NOT NULL
                    )
@@ -92,7 +91,6 @@ def create_event():
 
     title = data.get('title')
     description = data.get('description', '')
-    age = data.get('age')
     latitude = data.get('latitude')
     longitude = data.get('longitude')
 
@@ -103,9 +101,9 @@ def create_event():
         conn = sqlite3.connect(DATABASE1)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO events (title, description, age, latitude, longitude)
+            INSERT INTO events (title, description, latitude, longitude)
             VALUES (?,?,?,?)
-        ''', (title, description, age, latitude, longitude))
+        ''', (title, description, latitude, longitude))
         conn.commit()
         conn.close()
 
@@ -120,7 +118,7 @@ def get_events():
     try:
         conn = sqlite3.connect(DATABASE1)
         cursor = conn.cursor()
-        cursor.execute('SELECT id, title, description, age, latitude, longitude FROM events')
+        cursor.execute('SELECT id, title, description, latitude, longitude FROM events')
         rows = cursor.fetchall()        
         conn.close()
     
@@ -129,9 +127,8 @@ def get_events():
                 'id': row[0],
                 'title': row[1],
                 'description': row[2],
-                'age': row[3],
-                'latitude': row[4],
-                'longitude': row[5]
+                'latitude': row[3],
+                'longitude': row[4]
             }
             for row in rows
         ]
