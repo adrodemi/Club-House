@@ -6,16 +6,19 @@ import os
 app = Flask(__name__)
 CORS(app)
 
+# Configuration
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Database initialization
-DATABASE = 'registration.db'
+# Database paths
+USER_DATABASE = 'registration.db'
+EVENT_DATABASE = 'events.db'
 
-def init_db():
-    """Initialize the SQLite database."""
-    conn = sqlite3.connect(DATABASE)
+
+# Initialize the user database
+def init_user_db():
+    conn = sqlite3.connect(USER_DATABASE)
     cursor = conn.cursor()
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
@@ -31,8 +34,29 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Initialize the database
-#init_db()
+
+# Initialize the event database
+def init_event_db():
+    conn = sqlite3.connect(EVENT_DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            latitude REAL NOT NULL,
+            longitude REAL NOT NULL,
+            photo_path TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+
+# Initialize databases
+init_user_db()
+init_event_db()
+
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -51,7 +75,7 @@ def register():
         return jsonify({'error': 'All fields are required'}), 400
 
     try:
-        conn = sqlite3.connect(DATABASE)
+        conn = sqlite3.connect(USER_DATABASE)
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO users (username, full_name, age, email, password, location)
@@ -67,56 +91,33 @@ def register():
         return jsonify({'error': str(e)}), 500
 
 
-DATABASE1 = "events.db"
-
-def init_db1():
-    conn = sqlite3.connect("DATABASE1")
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS events (
-                   id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   title TEXT NOT NULL,
-                   description TEXT,
-                   latitude REAL NOT NULL,
-                   longitude REAL NOT NULL,
-                   photo_path TEXT
-                   )
-                ''')
-    
-    conn.commit()
-    conn.close()
-
-
-init_db1()
-
 @app.route('/create-event', methods=['POST'])
 def create_event():
     """Handle event creation."""
-
-    data = request.get_json()
-
-    title = data.get('title')
-    description = data.get('description', '')
-    latitude = data.get('latitude')
-    longitude = data.get('longitude')
+    title = request.form.get('title')
+    description = request.form.get('description', '')
+    latitude = request.form.get('latitude')
+    longitude = request.form.get('longitude')
     photo = request.files.get('photo')
 
-    if not title or latitude is None or longitude is None:
+    # Validate input
+    if not title or not latitude or not longitude:
         return jsonify({'error': 'Title, latitude, and longitude are required'}), 400
-    
-    photo_path = None
-    if photo:
-        photo_filename = os.path.join(app.config['UPLOAD_FOLDER'], photo.filename)
-        photo.save(photo_filename)
-        photo_path = photo_filename
-
 
     try:
-        conn = sqlite3.connect(DATABASE1)
+        # Save the photo if provided
+        photo_path = None
+        if photo:
+            photo_filename = os.path.join(app.config['UPLOAD_FOLDER'], photo.filename)
+            photo.save(photo_filename)
+            photo_path = photo_filename
+
+        # Insert event into database
+        conn = sqlite3.connect(EVENT_DATABASE)
         cursor = conn.cursor()
         cursor.execute('''
             INSERT INTO events (title, description, latitude, longitude, photo_path)
-            VALUES (?,?,?,?)
+            VALUES (?, ?, ?, ?, ?)
         ''', (title, description, float(latitude), float(longitude), photo_path))
         conn.commit()
         conn.close()
@@ -124,18 +125,18 @@ def create_event():
         return jsonify({'message': 'Event created successfully'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
+
 
 @app.route('/events', methods=['GET'])
 def get_events():
-    """Retrieve all events from the database."""
+    """Retrieve all events."""
     try:
-        conn = sqlite3.connect(DATABASE1)
+        conn = sqlite3.connect(EVENT_DATABASE)
         cursor = conn.cursor()
         cursor.execute('SELECT id, title, description, latitude, longitude, photo_path FROM events')
-        rows = cursor.fetchall()        
+        rows = cursor.fetchall()
         conn.close()
-    
+
         events = [
             {
                 'id': row[0],
@@ -151,9 +152,7 @@ def get_events():
         return jsonify(events), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    
 
 
 if __name__ == '__main__':
     app.run(debug=True)
-
