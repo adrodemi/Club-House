@@ -78,7 +78,7 @@ def init_db1():
                    title TEXT NOT NULL,
                    description TEXT,
                    latitude REAL NOT NULL,
-                   longitude REAL NOT NULL
+                   longitude REAL NOT NULL,
                    photo_path TEXT
                    )
                 ''')
