@@ -61,34 +61,41 @@ function openCreateEventPopup(latlng) {
 }
 
 function saveEvent(lat, lng) {
-  var title = document.getElementById('title').value;
-  var description = document.getElementById('description').value;
-  var photoInput = document.getElementById('photo');
-  var photoFile = photoInput.files[0];
+    var title = document.getElementById('title').value;
+    var description = document.getElementById('description').value;
+    var photoInput = document.getElementById('photo');
+    var photoFile = photoInput.files[0];
 
-  if (title && description) {
-      var newEvent = { lat, lng, title, description, photoUrl: null };
+    if (title && description) {
+        var formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('latitude', lat);
+        formData.append('longitude', lng);
+        if (photoFile) {
+            formData.append('photo', photoFile);
+        }
 
-      // If a photo is uploaded, process it
-      if (photoFile) {
-          var reader = new FileReader();
-          reader.onload = function (e) {
-              newEvent.photoUrl = e.target.result;
+        fetch('http://127.0.0.1:5000/create-event', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert('Event created successfully!');
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
 
-              // Save the event with the photo
-              createMarker(newEvent);
-          };
-          reader.readAsDataURL(photoFile); // Convert photo to base64
-      } else {
-          // Save the event without a photo
-          createMarker(newEvent);
-      }
-
-      // Close the popup
-      map.closePopup();
-  } else {
-      alert("Please fill out all fields.");
-  }
+        map.closePopup();
+    } else {
+        alert("Please fill out all fields.");
+    }
 }
 
 function createMarker(event) {
