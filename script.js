@@ -19,6 +19,107 @@ const customIcon = L.icon({
     shadowAnchor: [12, 41]
 });
 
+
+// Sidebar toggle functionality
+const sidebar = document.getElementById('sidebar');
+const toggleSidebarButton = document.getElementById('toggle-sidebar');
+
+// Toggle sidebar visibility
+toggleSidebarButton.addEventListener('click', () => {
+    sidebar.classList.toggle('hidden');
+});
+
+// Populate sidebar with events
+function populateSidebar(events) {
+    const eventList = document.getElementById('event-list');
+    eventList.innerHTML = ''; // Clear the existing list
+
+    events.forEach(event => {
+        const listItem = document.createElement('li');
+        listItem.style.marginBottom = '10px';
+
+        listItem.innerHTML = `
+            <strong>${event.title}</strong><br>
+            ${event.description}<br>
+            <button onclick="centerMap(${event.latitude}, ${event.longitude})" style="margin-top: 5px; background-color: #2ecc71; color: white; padding: 5px 10px; border: none; cursor: pointer;">
+                View on Map
+            </button>
+        `;
+
+        eventList.appendChild(listItem);
+    });
+}
+
+// Center the map on a specific location
+function centerMap(lat, lng) {
+    map.setView([lat, lng], 15); // Adjust zoom level if needed
+}
+
+function renderEvents(events) {
+    events.forEach(event => {
+        const marker = L.marker([event.latitude, event.longitude], { icon: customIcon }).addTo(map);
+
+        const popupContent = `
+            <div style="max-width: 250px;">
+                <h3 style="margin-bottom: 10px;">${event.title}</h3>
+                ${event.photoUrl ? `<img src="http://127.0.0.1:5000/${event.photoUrl}" alt="Event Photo" style="width:100%; max-height:150px; object-fit:cover; margin-bottom:8px;">` : ''}
+                <p style="margin-bottom: 0;">${event.description}</p>
+            </div>
+        `;
+        marker.bindPopup(popupContent);
+    });
+
+    // Populate the sidebar with events
+    populateSidebar(events);
+}
+
+// Example function to add a message to the Event List
+function addMessage(username, messageText) {
+    const eventList = document.getElementById('event-list');
+
+    // Create the message container
+    const messageContainer = document.createElement('li');
+    messageContainer.className = 'message-container';
+
+    // Add username
+    const usernameElement = document.createElement('p');
+    usernameElement.className = 'username';
+    usernameElement.textContent = username;
+    messageContainer.appendChild(usernameElement);
+
+    // Add message text
+    const messageElement = document.createElement('p');
+    messageElement.className = 'message';
+    messageElement.textContent = messageText;
+    messageContainer.appendChild(messageElement);
+
+    // Add icons (like and comment)
+    const iconsContainer = document.createElement('div');
+    iconsContainer.className = 'message-icons';
+
+    const likeIcon = document.createElement('span');
+    likeIcon.className = 'icon';
+    likeIcon.textContent = '👍';
+    iconsContainer.appendChild(likeIcon);
+
+    const commentIcon = document.createElement('span');
+    commentIcon.className = 'icon';
+    commentIcon.textContent = '💬';
+    iconsContainer.appendChild(commentIcon);
+
+    messageContainer.appendChild(iconsContainer);
+
+    // Add the message container to the Event List
+    eventList.appendChild(messageContainer);
+}
+
+// Example usage
+addMessage('Lanitio Football', 'Vasia69 and Arseny123 are going!');
+addMessage('Basketball Shawarma Night', 'anDROID and YaKoV are going to this event!');
+addMessage('Cyprus_iT', 'ivaniidze and Sererga3000 are attending!');
+
+
+
 // Click event listener to create a new event
 map.on('click', (e) => {
     openCreateEventPopup(e.latlng);

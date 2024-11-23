@@ -3,13 +3,111 @@ body {
   margin: 0;
   font-family: Arial, sans-serif;
   background: black; /* Ensures a consistent dark theme */
+  overflow:hidden;
 }
 
 #map {
   height: 100vh; /* Full height of the viewport */
   width: 100vw; /* Full width of the viewport */
+  position: absolute;
   background: black; /* Backup background color */
 }
+
+/* Sidebar styles */
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease-in-out;
+  padding-top: 60px; /* Add space to avoid overlap with the button */
+  box-sizing: border-box; /* Ensure padding doesn't affect overall dimensions */
+}
+
+/* Ensure the sidebar is hidden by default */
+.hidden {
+  transform: translateX(-100%);
+}
+
+/* Sidebar visible by default (for testing) */
+#sidebar:not(.hidden) {
+  transform: translateX(0);
+}
+
+#toggle-sidebar {
+  position: absolute;
+  top: 10px; /* Ensure the button stays visible */
+  left: 20px;
+  z-index: 1100;
+  background-color: #2ecc71;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  #toggle-sidebar {
+      top: 15px; /* Adjust button positioning for smaller screens */
+      left: 10px;
+  }
+
+  #sidebar {
+      width: 200px; /* Narrower sidebar for smaller screens */
+  }
+}
+
+
+
+
+
+/* General styling for the list */
+#event-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Message container styling */
+.message-container {
+  padding: 10px;
+  border-bottom: 1px solid white; /* Thin white line between messages */
+}
+
+/* Username styling */
+.username {
+  font-weight: bold;
+  color: #2ecc71; /* Green username */
+  margin: 0;
+  margin-bottom: 5px;
+}
+
+/* Message styling */
+.message {
+  color: white;
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+/* Message icons container */
+.message-icons {
+  display: flex;
+  gap: 10px; /* Space between icons */
+  color: lightgray;
+}
+
+/* Individual icons */
+.message-icons .icon {
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.2s;
+}
+
+/* Icon hover effect */
+.message-icons .icon:hover {
+  color: white;
+}
+
+
 
 /* Customize Leaflet popup */
 .leaflet-popup-content-wrapper {
