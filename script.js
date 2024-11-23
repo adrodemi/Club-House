@@ -10,7 +10,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 
 // Custom marker icon
 const customIcon = L.icon({
-    iconUrl: './images/custom-marker.png', // Update with your actual icon path
+    iconUrl: './pictures/pointToGo_high_res.png', // Update with your actual icon path
     iconSize: [32, 32],
     iconAnchor: [16, 32],
     popupAnchor: [0, -32],
