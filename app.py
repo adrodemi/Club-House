@@ -1,9 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
+import os
 
 app = Flask(__name__)
 CORS(app)
+
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Database initialization
 DATABASE = 'registration.db'
@@ -27,7 +32,7 @@ def init_db():
     conn.close()
 
 # Initialize the database
-init_db()
+#init_db()
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -74,6 +79,7 @@ def init_db1():
                    description TEXT,
                    latitude REAL NOT NULL,
                    longitude REAL NOT NULL
+                   photo_path TEXT
                    )
                 ''')
     
@@ -93,17 +99,25 @@ def create_event():
     description = data.get('description', '')
     latitude = data.get('latitude')
     longitude = data.get('longitude')
+    photo = request.files.get('photo')
 
     if not title or latitude is None or longitude is None:
         return jsonify({'error': 'Title, latitude, and longitude are required'}), 400
     
+    photo_path = None
+    if photo:
+        photo_filename = os.path.join(app.config['UPLOAD_FOLDER'], photo.filename)
+        photo.save(photo_filename)
+        photo_path = photo_filename
+
+
     try:
         conn = sqlite3.connect(DATABASE1)
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO events (title, description, latitude, longitude)
+            INSERT INTO events (title, description, latitude, longitude, photo_path)
             VALUES (?,?,?,?)
-        ''', (title, description, latitude, longitude))
+        ''', (title, description, float(latitude), float(longitude), photo_path))
         conn.commit()
         conn.close()
 
@@ -118,7 +132,7 @@ def get_events():
     try:
         conn = sqlite3.connect(DATABASE1)
         cursor = conn.cursor()
-        cursor.execute('SELECT id, title, description, latitude, longitude FROM events')
+        cursor.execute('SELECT id, title, description, latitude, longitude, photo_path FROM events')
         rows = cursor.fetchall()        
         conn.close()
     
@@ -128,7 +142,8 @@ def get_events():
                 'title': row[1],
                 'description': row[2],
                 'latitude': row[3],
-                'longitude': row[4]
+                'longitude': row[4],
+                'photoUrl': row[5] if row[5] else None
             }
             for row in rows
         ]
