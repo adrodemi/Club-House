@@ -98,6 +98,30 @@ function saveEvent(lat, lng) {
     }
 }
 
+function loadEvents() {
+    fetch('http://127.0.0.1:5000/events')
+        .then(response => response.json())
+        .then(events => {
+            events.forEach(event => {
+                var marker = L.marker([event.latitude, event.longitude], { icon: customIcon }).addTo(map);
+                var popupContent = `
+                    <div>
+                        <h3>${event.title}</h3>
+                        ${event.photoUrl ? `<img src="http://127.0.0.1:5000/${event.photoUrl}" alt="Event Photo" style="width:100%; max-height:150px; object-fit:cover; margin-bottom:8px;">` : ''}
+                        <p>${event.description}</p>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading events:', error);
+        });
+}
+
+// Call the function after initializing the map
+loadEvents();
+
 function createMarker(event) {
   var marker = L.marker([event.lat, event.lng], { icon: customIcon }).addTo(map);
   var popupContent = `
