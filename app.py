@@ -61,5 +61,87 @@ def register():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+DATABASE1 = "events.db"
+
+def init_db1():
+    conn = sqlite3.connect("DATABASE1")
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS events (
+                   id INTEGER PRIMARY KEY AUTOINCREMENT,
+                   title TEXT NOT NULL,
+                   description TEXT,
+                   age INTEGER,
+                   latitude REAL NOT NULL,
+                   longitude REAL NOT NULL
+                   )
+                ''')
+    
+    conn.commit()
+    conn.close()
+
+
+init_db1()
+
+@app.route('/create-event', methods=['POST'])
+def create_event():
+    """Handle event creation."""
+
+    data = request.get_json()
+
+    title = data.get('title')
+    description = data.get('description', '')
+    age = data.get('age')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+
+    if not title or latitude is None or longitude is None:
+        return jsonify({'error': 'Title, latitude, and longitude are required'}), 400
+    
+    try:
+        conn = sqlite3.connect(DATABASE1)
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO events (title, description, age, latitude, longitude)
+            VALUES (?,?,?,?)
+        ''', (title, description, age, latitude, longitude))
+        conn.commit()
+        conn.close()
+
+        return jsonify({'message': 'Event created successfully'}), 201
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+@app.route('/events', methods=['GET'])
+def get_events():
+    """Retrieve all events from the database."""
+    try:
+        conn = sqlite3.connect(DATABASE1)
+        cursor = conn.cursor()
+        cursor.execute('SELECT id, title, description, age, latitude, longitude FROM events')
+        rows = cursor.fetchall()        
+        conn.close()
+    
+        events = [
+            {
+                'id': row[0],
+                'title': row[1],
+                'description': row[2],
+                'age': row[3],
+                'latitude': row[4],
+                'longitude': row[5]
+            }
+            for row in rows
+        ]
+
+        return jsonify(events), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
