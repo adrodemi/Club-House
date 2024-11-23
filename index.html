@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Map with Event Creation</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar HTML -->
+    <div id="sidebar" class="hidden" style="position: absolute; top: 0; left: 0; width: 250px; height: 100%; background-color: #333; color: white; padding: 15px; overflow-y: auto; z-index: 1000;">
+      <!-- Spacer to account for button height -->
+      <div style="height: 60px;"></div> 
+      <h2>Event List</h2>
+      <ul id="event-list">
+          <!-- Events will be dynamically populated here -->
+      </ul>
+  </div>
+
+<!-- Sidebar Toggle Button -->
+<button id="toggle-sidebar" style="position: absolute; top: 20px; left: 20px; z-index: 1100; background-color: #2ecc71; color: white; padding: 10px 15px; border: none; cursor: pointer;">
+  Toggle Sidebar
+</button>
+  
+  
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>
